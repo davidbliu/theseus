@@ -1,0 +1,59 @@
+.instance_name
+{
+	margin-left: 25px;
+}
+.instance_info
+{
+	margin-left: 75px;
+}
+#header{
+	text-align:center;
+	background-color: black;
+	color: white;
+}
+#theseus-title{
+	color:white;
+}
+#navbar-link{
+	color:gray;
+	font-size: 15px;
+}
+#navbar-link:hover{
+	color: white;
+	text-decoration:none;
+}
+.service-label{
+	margin-bottom: 3px;
+}
+#instance-detail-list li{
+	/*margin-left: 50px;*/
+	list-style-type: none;
+}
+#instance-detail-list li ul .port-li{
+	list-style-type: none;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+	color: #fff;
+	background-color: #2C3C49;
+}
+a.list-group-item.active>.badge, .nav-pills>.active>a>.badge {
+	color: #0D111F;
+	background-color: #fff;
+}
+.label-default {
+	background-color: #999;
+	font-size: 13px;
+}
+.panel.panel-default{
+	margin: 15px;
+	padding: 10px 5px 10px 5px;
+	cursor: pointer;
+}
+ul.labeled-group-list li{
+	list-style: none;
+	text-indent: 15px;
+}
+.label-default {
+background-color: #67AF5D;
+font-size: 13px;
+}

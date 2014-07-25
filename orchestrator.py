@@ -4,6 +4,7 @@ import uuid
 import pickle
 import json
 import requests
+import argparse
 # services = []
 #
 # load default services from config. these can be modified in-app
@@ -12,9 +13,13 @@ import requests
 
 
 def sync_subscriber():
+	print 'syncing subscriber'
 	data = yaml.load(open('mesos.yaml', 'r'))
 	subscriber_address = 'http://'+data['subscriber']['host']+':'+str(data['subscriber']['port'])+'/reconfigure'
+
+	mesos_data = yaml.load(open('mesos.yaml', 'r'))
 	config_data = yaml.load(open('saved_config.yaml', 'r'))
+	config_data = dict(mesos_data.items() + config_data.items())
 	payload = {'config_data': json.dumps(config_data)}
 	# print 'sending post request here...'
 	# print subscriber_address
@@ -24,7 +29,10 @@ def update_services(director):
 	services = director.services
 	data = yaml.load(open('added_configuration.yaml', 'r'))
 	print 'updating services'
+	if data.get('services') is None:
+		return
 	for serv in data['services'].keys():
+
 		config = data['services'][serv]
 		service = director.services.get(serv)
 		if not service:
@@ -48,35 +56,75 @@ def print_topo(director):
 
 # def flush_data():
 
+def load_director():
+	director = None
+	with open('director.pkl', 'rb') as input:
+			director = pickle.load(input)
+	return director
 
 
-def test():
+def deploy():
 	#
 	# load director if he exists
 	#
-	with open('director.pkl', 'rb') as input:
-			director = pickle.load(input)
-
+	director = load_director()
 	#
 	# clean up director
 	#
 	director.clean()
-
-	print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-	# update_services(director)
-	# presenter = director.services['presenter'].labeled_groups
-	# for key in presenter:
-	# 	print key
-	# 	presenter[key].clean_deploy_ids()
+	print '>>>>>>>>>>>>>> CLEAN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+	update_services(director)
 	#
 	# save director
 	#
-	with open('director.pkl', 'wb') as output:
-		pickle.dump(director, output, pickle.HIGHEST_PROTOCOL)
+	director.dump()
 	#
 	# save current config
 	#
 	director.flush_config('saved_config.yaml')
 	sync_subscriber()
 
-test()
+def undeploy(service_name, labels = []):
+	director = load_director()
+	director.clean()
+	print director.services
+	serv = director.services.get(service_name)
+	if serv is None:
+		print 'serv is none'
+		return
+	group = serv.labeled_groups.get(str(sorted(labels)))
+	if group:
+		group.undeploy()
+		print 'undeployed'
+	else:
+		print 'no group'
+	director.dump()
+	director.flush_config('saved_config.yaml')
+	sync_subscriber()
+
+if __name__ == "__main__":
+    print 'Welcome Master Liu'
+    sync_subscriber()
+    parser = argparse.ArgumentParser(description='Docker Orchestrator Launcher')
+    parser.add_argument('-s', '--service-name', required=True, help='service name')
+    parser.add_argument('-c', '--command', required=True, help='command')
+    parser.add_argument('-l', '--labels', required=False, help='command')
+    args = parser.parse_args()
+    service = args.service_name
+    command = args.command
+
+    if command == 'deploy':
+    	deploy()
+    elif command == 'undeploy':
+    	# labels = ['dragons','fairydust','hello','ponies']
+    	label_list = args.labels
+    	if label_list is None or label_list is "":
+    		labels = []
+    	else:
+    		labels = label_list.split(',')
+    	service = 'my_name_is_david'
+    	undeploy(service, labels)
+    	# undeploy(service)
+    	#
+    	# test undeploy functionalitiy
+    	#

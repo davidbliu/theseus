@@ -1,26 +1,54 @@
 services:
-  # ingestor:
-  #   labels: ['hello','ponies', 'dragons']
-  #   image: 54.189.193.228:5000/flask
-  #   ports: 
-  #     ssh: 22
-  #     api: 5000
-  #   environment:
-  #     APP_NAME: Ingestor
-  #     KEYSPACE_NAME: 'flask_keyspace2'
-  #     TABLE_NAME: 'flask_table2'
-  #   instances: 3
-  #   cpus: 0.1 
-  #   mem: 128
-  presenter:
-    labels: ['main', 'halogen', 'money']
+  ingestor:
+    labels: ['testing']
     image: 54.189.193.228:5000/flask
-    ports:
+    ports: 
       ssh: 22
       api: 5000
     environment:
-      APP_NAME: D Liu Yo Dawg
+      APP_NAME: Charles Dickens
       KEYSPACE_NAME: 'flask_keyspace2'
       TABLE_NAME: 'flask_table2'
-    instances: 2
-    cpus: 0.1
+    instances: 3
+    cpus: 0.1 
+    mem: 128
+  # my_name_is_david:
+  #   labels: ['main', 'halogen', 'money', 'hoohoo']
+  #   image: 54.189.193.228:5000/flask
+  #   ports:
+  #     ssh: 22
+  #     api: 5000
+  #   environment:
+  #     APP_NAME: D Liu Yo Dawg Mayn
+  #     KEYSPACE_NAME: 'flask_keyspace2'
+  #     TABLE_NAME: 'flask_table2'
+  #   instances: 2
+  #   custom_constraints: fixed-host
+  #   cpus: 0.05
+  #   mem: 128
+  # cassandra:
+  #   labels: ['testing']
+  #   image: 54.189.193.228:5000/cassandra #-processor-s # this version has subscriber
+  #   ports-hard:
+  #     storage: 7000
+  #     native: 9042
+  #     thrift: 9160
+  #   instances: 2
+  #   cpus: 0.3
+  #   mem: 1024
+  #   environment:
+  #     MIN_NODES: 2
+  #   volumes: ['/home/ser/ubuntu/volume-test:/opt/testvolume']
+  # haproxy:
+  #   labels: ['second', 'label_watcher']
+  #   image: 54.189.193.228:5000/haproxy
+  #   ports:
+  #     ssh: 22
+  #     proxy: 80
+  #     idk: 443
+  #     suscriber: 5000
+  #   environment:
+  #     PROXY_SERVICE: ingestor
+  #     PROXY_PORT: api
+  #     PROXY_LABELS: testing
+  #     WATCHES: ingestor

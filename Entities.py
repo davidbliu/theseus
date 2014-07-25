@@ -23,6 +23,9 @@ class Director:
 			service = self.services[key]
 			print 'cleaning '+str(service)
 			service.remove_undeployed_groups()
+			if service.labeled_groups is None or len(service.labeled_groups.keys()) == 0:
+				print 'pop this service '+service.name
+				self.services.pop(service.name, None)
 	def find_labeled_group(self, service_name, labels):
 		service = services.get(service_name)
 		if not service:
@@ -38,6 +41,9 @@ class Director:
 			configuration[key] = subdict
 		with open(outfile, 'w') as output_file:
 			output_file.write(yaml.dump(configuration))
+	def dump(self):
+		with open('director.pkl', 'wb') as output:
+			pickle.dump(self, output, pickle.HIGHEST_PROTOCOL)
 
 
 class Service:
@@ -134,18 +140,15 @@ class LabeledGroup:
 		label_string = str(self.labels)[:-1][1:].replace("'", "-").replace(",", ".").replace(" ", "")
 		version_string = str(self.version)
 		marathon_id =  marathon_id_string + LabeledGroup.id_separator + label_string + LabeledGroup.id_separator + version_string + LabeledGroup.id_separator
-		# print 'encoded: '+str(marathon_id)
-		# print 'decoded: '+str(decode_marathon_id(marathon_id))
+
 		return marathon_id
 	#
 	# makes api call to marathon to deploy this group
 	#
 	def deploy(self):
-		# deploy_ids = launcher.launch(self.service.name, self.encode_marathon_id, self.config, self.labels)
-		# print 'these are my deploy_ids'
-		# print deploy_ids
-		# self.deploy_ids = deploy_ids
 		launcher.launch_group(self)
+	def undeploy(self):
+		launcher.unlaunch_group(self)
 	#
 	# returns true if my id is found in ANY app ids
 	# will return true if you are multi-fixed-service and subset of all your apps are up
@@ -160,6 +163,9 @@ class LabeledGroup:
 				return True
 		return False
 
+	#
+	# unused
+	#
 	def clean_deploy_ids(self):
 		marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
 		apps = marathon_client.list_apps()
@@ -178,23 +184,7 @@ class LabeledGroup:
 			if app.id == my_encoded_id:
 				return app.id
 		return None
-	#
-	# gets app id for the deployed app. used to replace this group
-	#
-	# @property
-	# def get_deployed_id(self):
-	# 	marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
-	# 	apps = marathon_client.list_apps()
-	# 	for app in apps:
-	# 		decoded = decode_marathon_id(app.id)
-	# 		if self.labels == decoded['labels'] and self.service.name == decoded['service']:
-	# 			return app.id
-	# 	return None
-
-	# returns number of instances running. check marathon for this
-	#
-	def instances(self):
-		return 0
+	
 # 
 # gets a service and labels from marathon id
 #

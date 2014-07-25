@@ -2,71 +2,14 @@
 {% block title %}Docker-Mesos{% endblock %}
 {% block content %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<style type = 'text/css'>
-.instance_name
-{
-	margin-left: 25px;
-}
-.instance_info
-{
-	margin-left: 75px;
-}
-#header{
-	text-align:center;
-	background-color: black;
-	color: white;
-}
-#theseus-title{
-	color:white;
-}
-#navbar-link{
-	color:gray;
-	font-size: 15px;
-}
-#navbar-link:hover{
-	color: white;
-	text-decoration:none;
-}
-.service-label{
-	margin-bottom: 3px;
-}
-#instance-detail-list li{
-	margin-left: 50px;
-}
-#instance-detail-list li ul .port-li{
-	margin-left: -15px;
-	list-style-type: none;
-}
-.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
-	color: #fff;
-	background-color: #2C3C49;
-}
-a.list-group-item.active>.badge, .nav-pills>.active>a>.badge {
-	color: #0D111F;
-	background-color: #fff;
-}
-.label-default {
-	background-color: #999;
-	font-size: 13px;
-}
-.labeled-group-div{
-	margin: 15px;
-	padding: 10px 5px 10px 5px;
-	cursor: pointer;
-}
-ul.labeled-group-list li{
-	list-style: none;
-	text-indent: 15px;
-}
-</style>
 
-<script type='text/javascript'>
-$(document).ready(function(){
-	$('.labeled-group-div').click(function(){
-		alert('do you want to deploy this group');
-	});
-});
-</script>
+<link rel="stylesheet"
+      type="text/css"
+      href="/static/index.css"/>
+
+<script language="javascript"
+      type="text/javascript"
+      src="/static/index.js"></script>
 
 
 
@@ -77,11 +20,15 @@ $(document).ready(function(){
 </nav>
 
 <div id='left-col' class='col-md-2'>
-<h2>Services</h2>
+<h2 style ='text-align:center'>Services</h2>
 <div id='service-list-wrapper'>
 	<ul class="list-group">
-		{% for service in services %}
-		<li class='list-group-item service-button'>{{ service.name }}</li>
+		{% for s_key in director.services.keys() %}
+		{% with service=director.services.get(s_key) %}
+		{% if query_service==service.name or query_service =="None" %}
+			<li class='list-group-item service-button'>{{ service.name }}</li>
+		{% endif %}
+		{% endwith %}
 		{% endfor %}
 	</ul>
 </div>
@@ -89,28 +36,68 @@ $(document).ready(function(){
 
 
 <div id='mid-col'class='col-md-6'>
-<h2>Configuration</h2>
+<h2 style ='text-align:center'>Configuration</h2>
 <div id='configuration-viewer'>
-	{% for group in groups %}
-	<div id = "{{ group.encode_marathon_id }}" class='labeled-group-div panel panel-default'>
-		<ul class='labeled-group-list'>
-		<b>service </b>{{ group.service }}
-		<b>labels </b>{{ group.labels }}
-		{% for key in group.config.keys() %}
-		<li>{{ key }}: {{ group.config[key] }}
-		</li>
-		{% endfor %}
-		<b>version</b> {{ group.version }}
-		</ul>
 
-	</div>
+	{% for group in groups %}
+
+		<div id = "{{ group.encode_marathon_id }}" class='labeled-group-div panel panel-default'>
+			<ul class='labeled-group-list'>
+			<div><b>service </b>{{ group.service.name }}</div>
+			<div><b>labels </b>{{ group.labels }}</div>
+			{% for key in group.config.keys() %}
+			<li>{{ key }}: {{ group.config[key] }}
+			</li>
+			{% endfor %}
+			<div><b>version</b> {{ group.version }}</div>
+			<div><b>task id</b> {{ group.deploy_ids }}</div>
+			</ul>
+
+		</div>
+
 	{% endfor %}
 </div>
 </div>
 
 
 <div id='right-col' class='col-md-4'>
-<h2>Information</h2>
+<h2 style ='text-align:center'>Containers</h2>
+<div id='etcd-data-wrapper'>
+
+
+	{% for service in registered.keys() %}
+	{% if registered[service].keys()|length > 0 %}
+		  <div clas='panel panel-default'>
+
+		  <div class='label label-default'>{{ service }} ({{ registered[service].keys()|length }})</div>
+		    {% for instance in registered[service].keys() %}
+		    <div id='instance-detail-list' class = 'panel panel-default'>
+		    	<b>{{ registered[service][instance]['instance_name'] }}</b>
+		    	<div>host: {{ registered[service][instance]['instance_host'] }}</div>
+				<div>ports: 
+					<ul>
+						{% for key in registered[service][instance]['port_mapping'].keys() %}
+							<li class = 'port-li'>{{ key }}: <a href="http://{{ registered[service][instance]['instance_host'] }}:{{ registered[service][instance]['port_mapping'][key]['external'][1][:-4] }}">{{ registered[service][instance]['instance_host'] }}:{{ registered[service][instance]['port_mapping'][key]['external'][1][:-4] }}</a>
+							</li>
+							{% endfor %}
+					</ul>
+					<!-- end of list of ports -->
+				</div>
+				{% if registered[service][instance]['labels']|length != 0 %}
+				<div>labels: {{registered[service][instance]['labels'] }}</div>
+				{% endif %}
+	    	</div>
+	    	<!-- end of service instance -->
+	    	 {% endfor %}
+	  	</div>
+	 {% endif %}
+	 {% endfor %}
+	  	<!-- end of li for service -->
+
+
+</div>
+
+
 </div>
 
 {% endblock %}

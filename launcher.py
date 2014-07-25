@@ -87,25 +87,7 @@ def launch_group(labeled_group):
 		# just launch app all at once
 		launch_app(labeled_group.service.name, labeled_group.encode_marathon_id, labeled_group.config, labeled_group.labels)
 		labeled_group.deploy_ids = [labeled_group.encode_marathon_id]
-	# custom_constraints = service_dict.get('custom_constraints')
-	# if custom_constraints:
-	# 	print 'these are your constraints '+str(custom_constraints)
-	# 	if custom_constraints == 'fixed-host':
-	# 		deploy_ids = []
-	# 		for i in range(0,int(instances)):
-	# 			new_encoded_id = service_encoded_id + str(i)
-	# 			deploy_id = marathon_api_launch(image, options, new_encoded_id, 1, constraints, cpus, mem, env, ports)
-	# 			deploy_ids.append(deploy_id)
-	# 		return deploy_ids
-	# 	else:
-	# 		print 'no other custom constraints implemented yet!'
-	# else:
-	# 	deploy_id = marathon_api_launch(image, options, service_encoded_id, instances, constraints, cpus, mem, env, ports)
-	# 	return [deploy_id]
 
-	#
-	# set up marathon client and launch container
-	#
 def marathon_api_launch(image, options, marathon_app_id, instances, constraints, cpus, mem, env, ports):
 	marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
 	marathon_client.create_app(
@@ -122,3 +104,14 @@ def marathon_api_launch(image, options, marathon_app_id, instances, constraints,
 		ports = ports #should be listed in order they appear in dockerfile
 	)
 	return marathon_app_id
+
+def unlaunch_app(app_id):
+	marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
+	marathon_client.delete_app(app_id)
+
+def unlaunch_group(labeled_group):
+	#
+	# undeploy all apps
+	#
+	for app in labeled_group.deploy_ids:
+		unlaunch_app(app)
