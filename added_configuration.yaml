@@ -13,15 +13,14 @@ services:
   #   cpus: 0.1 
   #   mem: 128
   presenter:
-    labels: ['main']
+    labels: ['main', 'halogen', 'money']
     image: 54.189.193.228:5000/flask
     ports:
       ssh: 22
       api: 5000
     environment:
-      APP_NAME: Presenter
+      APP_NAME: D Liu Yo Dawg
       KEYSPACE_NAME: 'flask_keyspace2'
       TABLE_NAME: 'flask_table2'
     instances: 2
     cpus: 0.1
-    custom_constraints: fixed-host

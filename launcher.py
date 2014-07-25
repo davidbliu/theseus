@@ -16,11 +16,12 @@ def sync_subscriber():
 	# print 'sending post request here...'
 	# print subscriber_address
 	r = requests.post(subscriber_address, data={'config_data':json.dumps(config_data)})
+
 #
-# launches a labeled group
+# launches a single app. you may need to launch several apps for fixed host groups
 #
-def launch(service, service_encoded_id,  config, labels = [], instances = -1):
-	print 'launching ' + service
+def launch_app(service_name, app_id, config, labels = [], instances = -1):
+	print 'launching ' + service_name
 	service_dict = config
 	image = service_dict['image']
 	try:
@@ -40,7 +41,7 @@ def launch(service, service_encoded_id,  config, labels = [], instances = -1):
 	# add support for @LABELS
 	#
 	env['LABELS'] = str(labels)
-	env['SERVICE_NAME'] = service
+	env['SERVICE_NAME'] = service_name
 	# set up custom environment variables
 	custom_env = service_dict.get('environment')
 	if custom_env:
@@ -52,7 +53,7 @@ def launch(service, service_encoded_id,  config, labels = [], instances = -1):
 	#
 	# TODO add support for this
 	#
-	if service == "cassandra":
+	if service_name == "cassandra":
 		options = ["-p", "7000:7000", "-p", "9042:9042", "-p", "9160:9160", "-p", "22000:22", "-p", "5000:5000"]
 		ports = []
 		constraints = [["hostname", "UNIQUE"]]
@@ -60,36 +61,47 @@ def launch(service, service_encoded_id,  config, labels = [], instances = -1):
 		for volume in service_dict['volumes']:
 			options.append('-v')
 			options.append(volume)
-	
-	# print 'here are your instance details'
-	# print type(service)
-	# print service_encoded_id
-	# print type(instances)
-	# print constraints
-	# print cpus
-	# print mem
-	# print env
-	# print ports
-	# print image
-	# print options
-	# print labels
-	# print type(labels)
-	# print 'end of instance details'
-	custom_constraints = service_dict.get('custom_constraints')
-	if custom_constraints:
-		print 'these are your constraints '+str(custom_constraints)
-		if custom_constraints == 'fixed-host':
-			deploy_ids = []
-			for i in range(0,int(instances)):
-				new_encoded_id = service_encoded_id + str(i)
-				deploy_id = marathon_api_launch(image, options, new_encoded_id, 1, constraints, cpus, mem, env, ports)
-				deploy_ids.append(deploy_id)
-			return deploy_ids
-		else:
-			print 'no other custom constraints implemented yet!'
+
+	return marathon_api_launch(image, options, app_id, instances, constraints, cpus, mem, env, ports)
+
+#
+# launches a labeled group
+#
+def launch_group(labeled_group):
+	# instances = labeled_group.config['instances']
+	custom_constraints = labeled_group.config.get('custom_constraints')
+	if custom_constraints and custom_constraints == 'fixed-host':
+		print 'oh noes FIXED HOST constrain what am i gonna do cry cry'
+		# must launch as separate apps each one instance
+		instances = labeled_group.config.get('instances')
+		if instances == None:
+			instances = 1
+		deploy_ids = []
+		for i in range(0,int(instances)):
+			new_encoded_id = labeled_group.encode_marathon_id + str(i)
+			deploy_id = launch_app(labeled_group.service.name, new_encoded_id, labeled_group.config, labeled_group.labels, instances = 1)
+			deploy_ids.append(deploy_id)
+		labeled_group.deploy_ids = deploy_ids
+
 	else:
-		deploy_id = marathon_api_launch(image, options, service_encoded_id, 1, constraints, cpus, mem, env, ports)
-		return [deploy_id]
+		# just launch app all at once
+		launch_app(labeled_group.service.name, labeled_group.encode_marathon_id, labeled_group.config, labeled_group.labels)
+		labeled_group.deploy_ids = [labeled_group.encode_marathon_id]
+	# custom_constraints = service_dict.get('custom_constraints')
+	# if custom_constraints:
+	# 	print 'these are your constraints '+str(custom_constraints)
+	# 	if custom_constraints == 'fixed-host':
+	# 		deploy_ids = []
+	# 		for i in range(0,int(instances)):
+	# 			new_encoded_id = service_encoded_id + str(i)
+	# 			deploy_id = marathon_api_launch(image, options, new_encoded_id, 1, constraints, cpus, mem, env, ports)
+	# 			deploy_ids.append(deploy_id)
+	# 		return deploy_ids
+	# 	else:
+	# 		print 'no other custom constraints implemented yet!'
+	# else:
+	# 	deploy_id = marathon_api_launch(image, options, service_encoded_id, instances, constraints, cpus, mem, env, ports)
+	# 	return [deploy_id]
 
 	#
 	# set up marathon client and launch container

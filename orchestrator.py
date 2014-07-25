@@ -2,35 +2,23 @@ import Entities as entities
 import yaml
 import uuid
 import pickle
+import json
+import requests
 # services = []
 #
 # load default services from config. these can be modified in-app
 # returns a list of services
 #
-def load_services():
-	services = []
-	data = yaml.load(open('configuration.yaml', 'r'))
-	for serv in data['services'].keys():
-		# print service
-		# image = data['services'][serv]['image
-		config = data['services'][serv]
-		# create labeled group
-		service = entities.Service(serv)
-		labeled_group = service.create_labeled_group(labels = ['main'], 
-													config = config)
-		# print labeled_group.encode_marathon_id
-		# print entities.decode_marathon_id(labeled_group.encode_marathon_id)
-		# print labeled_group.config
-		# labeled_group.deploy()
-		# print 'deployed'
-		services.append(service)
-	return services
 
-def get_service_by_name(name, services):
-	for service in services:
-		if service.name == name:
-			return service
-	return None
+
+def sync_subscriber():
+	data = yaml.load(open('mesos.yaml', 'r'))
+	subscriber_address = 'http://'+data['subscriber']['host']+':'+str(data['subscriber']['port'])+'/reconfigure'
+	config_data = yaml.load(open('saved_config.yaml', 'r'))
+	payload = {'config_data': json.dumps(config_data)}
+	# print 'sending post request here...'
+	# print subscriber_address
+	r = requests.post(subscriber_address, data={'config_data':json.dumps(config_data)})
 
 def update_services(director):
 	services = director.services
@@ -74,7 +62,12 @@ def test():
 	#
 	director.clean()
 
-	update_services(director)
+	print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
+	# update_services(director)
+	# presenter = director.services['presenter'].labeled_groups
+	# for key in presenter:
+	# 	print key
+	# 	presenter[key].clean_deploy_ids()
 	#
 	# save director
 	#
@@ -84,7 +77,6 @@ def test():
 	# save current config
 	#
 	director.flush_config('saved_config.yaml')
+	sync_subscriber()
 
-def test2():
-	print 'hi'
 test()

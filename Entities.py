@@ -72,15 +72,17 @@ class Service:
 		if existing_group is None:
 			# simple, deploy this onto marathon
 			print 'no prior groups found, deploying onto marathon'
-			self.labeled_groups[str(labels)] = labeled_group
 			labeled_group.deploy()
 		else:
 			# there is already one so you must replace it
 			print 'replacing existing labeled group'
-			self.labeled_groups[str(labels)] = labeled_group
-
+			print '     existing: '+str(existing_group)
+			print '     new: '+str(labeled_group)
+			# self.labeled_groups[str(labels)] = labeled_group
 			# rolling update
-			replacer.rolling_replace(existing_group.encode_marathon_id, labeled_group)
+			# replacer.rolling_replace(existing_group.encode_marathon_id, labeled_group)
+			replacer.rolling_replace_group(existing_group, labeled_group)
+		self.labeled_groups[str(labels)] = labeled_group
 		return labeled_group
 
 	def remove_undeployed_groups(self):
@@ -139,8 +141,15 @@ class LabeledGroup:
 	# makes api call to marathon to deploy this group
 	#
 	def deploy(self):
-		launcher.launch(self.service.name, self.encode_marathon_id, self.config, self.labels)
-
+		# deploy_ids = launcher.launch(self.service.name, self.encode_marathon_id, self.config, self.labels)
+		# print 'these are my deploy_ids'
+		# print deploy_ids
+		# self.deploy_ids = deploy_ids
+		launcher.launch_group(self)
+	#
+	# returns true if my id is found in ANY app ids
+	# will return true if you are multi-fixed-service and subset of all your apps are up
+	#
 	@property
 	def is_deployed(self):
 		marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
@@ -150,6 +159,15 @@ class LabeledGroup:
 			if my_encoded_id in app.id:
 				return True
 		return False
+
+	def clean_deploy_ids(self):
+		marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
+		apps = marathon_client.list_apps()
+		app_ids = [x.id for x in apps]
+		for deploy_id in self.deploy_ids:
+			if not deploy_id in app_ids:
+				print 'deploy_id is not in app id! '+str(deploy_id)
+				# remove deploy id
 
 	@property
 	def get_marathon_app_id(self):
