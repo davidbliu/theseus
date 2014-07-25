@@ -1,0 +1,132 @@
+{% extends "bootstrap/base.html" %}
+
+
+		<!-- Latest compiled and minified CSS -->
+	
+{% block title %}Docker-Mesos{% endblock %}
+{% block content %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<style type = 'text/css'>
+.instance_name
+{
+	margin-left: 25px;
+}
+.instance_info
+{
+	margin-left: 75px;
+}
+#header{
+	text-align:center;
+	background-color: black;
+	color: white;
+}
+#theseus-title{
+	color:white;
+}
+#navbar-link{
+	color:gray;
+	font-size: 15px;
+}
+#navbar-link:hover{
+	color: white;
+	text-decoration:none;
+}
+.service-label{
+	margin-bottom: 3px;
+}
+#instance-detail-list li{
+	margin-left: 50px;
+}
+#instance-detail-list li ul .port-li{
+	margin-left: -15px;
+	list-style-type: none;
+}
+.nav-pills>li.active>a, .nav-pills>li.active>a:hover, .nav-pills>li.active>a:focus {
+	color: #fff;
+	background-color: #2C3C49;
+}
+a.list-group-item.active>.badge, .nav-pills>.active>a>.badge {
+	color: #0D111F;
+	background-color: #fff;
+}
+</style>
+
+<script type='text/javascript'>
+$(document).ready(function(){
+	$('.service-info-button').click(function(){
+		alert($($(this).children()[0]).text());
+	});
+});
+</script>
+
+
+
+<nav id = 'header' class="navbar navbar-default" role="navigation">
+	<div class='navbar-brand' id='theseus-title'>Dashboard</div>
+	<div class='navbar-brand'><a id = 'navbar-link' href = 'http://54.188.87.91:5050'>Mesos Dashboard</a></div>
+	<div class='navbar-brand'><a id='navbar-link' href = 'http://54.188.87.91:8080'>Marathon Dashboard</a></div>
+</nav>
+
+<div class='col-md-3'>
+
+<!-- ETCD INFO -->
+<div class='service_wrapper'>
+	<h2>Services Deployed</h1>
+	<!-- <div class='service_name label label-primary'>{{ service }}</div> -->
+	<ul class="nav nav-pills nav-stacked">
+	{% for service in registered.keys() %}
+		  <li class="active service-label">
+		    <a class = 'service-info-button' id = {{ service }}>
+	    	<div  class='hidden-info' style="display:none">
+	    		{{ info_dict[service] }}
+	    	</div>
+		      <span class="badge pull-right">{{ registered[service].keys()|length }}</span>
+		      {{ service }}
+		    </a>
+		    {% for instance in registered[service].keys() %}
+		    <ul id='instance-detail-list'>
+		    	<b>{{ registered[service][instance]['instance_name'] }}</b>
+		    	<li>host: {{ registered[service][instance]['instance_host'] }}</li>
+				<li>ports: 
+					<ul>
+						{% for key in registered[service][instance]['port_mapping'].keys() %}
+							<li class = 'port-li'>{{ key }}: <a href="http://{{ registered[service][instance]['instance_host'] }}:{{ registered[service][instance]['port_mapping'][key]['external'][1][:-4] }}">{{ registered[service][instance]['instance_host'] }}:{{ registered[service][instance]['port_mapping'][key]['external'][1][:-4] }}</a>
+							</li>
+							{% endfor %}
+					</ul>
+					<!-- end of list of ports -->
+				</li>
+				{% if registered[service][instance]['labels']|length != 0 %}
+				<li>labels: {{registered[service][instance]['labels'] }}</li>
+				{% endif %}
+	    	</ul>
+	    	<!-- end of service instance -->
+	    	 {% endfor %}
+	  	</li>
+	 {% endfor %}
+	  	<!-- end of li for service -->
+	</ul>
+	<!-- end of list of all services -->
+</div>
+
+
+</div>
+
+
+
+
+<div class='col-md-9'>
+<h2>Marathon Dashboard</h2>
+<iframe src='http://54.188.87.91:8080' height=500 width=1200></iframe>
+</div>
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,26 @@
+ingestor:
+  '[''dragons'', ''hello'', ''ponies'']':
+    cpus: 0.1
+    environment: {APP_NAME: Ingestor, KEYSPACE_NAME: flask_keyspace2, TABLE_NAME: flask_table2}
+    image: 54.189.193.228:5000/flask
+    instances: 3
+    labels: [hello, ponies, dragons]
+    mem: 128
+    ports: {api: 5000, ssh: 22}
+  '[''hello'', ''ponies'']':
+    cpus: 0.1
+    environment: {APP_NAME: Ingestor, KEYSPACE_NAME: flask_keyspace2, TABLE_NAME: flask_table2}
+    image: 54.189.193.228:5000/flask
+    instances: 3
+    labels: [hello, ponies]
+    mem: 128
+    ports: {api: 5000, ssh: 22}
+presenter:
+  '[''main'']':
+    cpus: 0.1
+    custom_constraints: fixed-host
+    environment: {APP_NAME: Presenter, KEYSPACE_NAME: flask_keyspace2, TABLE_NAME: flask_table2}
+    image: 54.189.193.228:5000/flask
+    instances: 2
+    labels: [main]
+    ports: {api: 5000, ssh: 22}

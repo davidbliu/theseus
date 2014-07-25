@@ -1,0 +1,27 @@
+services:
+  # ingestor:
+  #   labels: ['hello','ponies', 'dragons']
+  #   image: 54.189.193.228:5000/flask
+  #   ports: 
+  #     ssh: 22
+  #     api: 5000
+  #   environment:
+  #     APP_NAME: Ingestor
+  #     KEYSPACE_NAME: 'flask_keyspace2'
+  #     TABLE_NAME: 'flask_table2'
+  #   instances: 3
+  #   cpus: 0.1 
+  #   mem: 128
+  presenter:
+    labels: ['main']
+    image: 54.189.193.228:5000/flask
+    ports:
+      ssh: 22
+      api: 5000
+    environment:
+      APP_NAME: Presenter
+      KEYSPACE_NAME: 'flask_keyspace2'
+      TABLE_NAME: 'flask_table2'
+    instances: 2
+    cpus: 0.1
+    custom_constraints: fixed-host

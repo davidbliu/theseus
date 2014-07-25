@@ -1,0 +1,141 @@
+#
+# need to have launched etcd and marathon prior
+#
+etcd:
+  host: 54.189.223.174
+  port: 4001
+marathon:
+  host: 54.188.87.91
+  # host: localhost
+  # host: 10.0.2.15
+  port: 8080
+subscriber:
+  host: 54.184.184.23
+  # host: localhost
+  port: 5000
+
+
+services:
+
+#
+# testing kubernetes functions
+#
+  presenter:
+    image: 54.189.193.228:5000/flask
+    ports:
+      ssh: 22
+      api: 5000
+    environment:
+      APP_NAME: Presenter
+      KEYSPACE_NAME: 'flask_keyspace2'
+      TABLE_NAME: 'flask_table2'
+    cpus: 0.1
+
+  ingestor:
+    image: 54.189.193.228:5000/flask
+    ports: 
+      ssh: 22
+      api: 5000
+    environment:
+      APP_NAME: Ingestor
+      KEYSPACE_NAME: 'flask_keyspace2'
+      TABLE_NAME: 'flask_table2'
+    instances: 3
+    cpus: 0.1 
+    mem: 128
+
+  ingestor.testing:
+    image: 54.189.193.228:5000/flask
+    ports:
+      ssh: 22
+      api: 5000
+    environment:
+      APP_NAME: Pineapple Butterfly
+      KEYSPACE_NAME: 'flask_keyspace2'
+      TABLE_NAME: 'flask_table2'
+    cpus: 0.1
+
+  haproxy:
+    image: 54.189.193.228:5000/haproxy
+    ports:
+      ssh: 22
+      proxy: 80
+      idk: 443
+      suscriber: 5000
+    environment:
+      PROXY_SERVICE: ingestor
+      PROXY_PORT: api
+      WATCHES: ingestor
+
+  haproxy.version2:
+    image: 54.189.193.228:5000/haproxy
+    ports:
+      ssh: 22
+      proxy: 80
+      idk: 443
+      suscriber: 5000
+    environment:
+      PROXY_SERVICE: ingestor
+      PROXY_PORT: api
+      PROXY_LABELS: testing
+      WATCHES: ingestor
+
+
+  cassandra:
+    image: 54.189.193.228:5000/cassandra #-processor-s # this version has subscriber
+    ports-hard:
+      storage: 7000
+      native: 9042
+      thrift: 9160
+    instances: 2
+    cpus: 0.3
+    mem: 1024
+    environment:
+      MIN_NODES: 2
+    volumes: ['/home/ser/ubuntu/volume-test:/opt/testvolume']
+
+  watcher:
+    image: 54.189.193.228:5000/watcher
+    cpus: 0.1
+    mem: 32
+    environment: 
+      WATCHES: 'ingestor,ingestor.testing,cassandra,haproxy,haproxy.version2,presenter'
+
+
+#   rails:
+#     # image: "davidbliu/autorails_marathon1"
+#     image: 54.189.193.228:5000/rails
+#     ports: 
+#       noname: 3000
+# #
+# # processor images
+# #
+#   zookeeper:
+#     image: "davidbliu/zookeeper_processor"
+#     ports:
+#       ssh: 22
+#       client: 2181
+#       peer: 2888
+#       election: 3888
+#     cpus: 0.1
+#   kafka:
+#     image: "davidbliu/kafka_processor_nossh"
+#     ports:
+#       ssh: 22
+#       broker: 9092
+#     cpus: 0.3
+#     mem: 1024
+  
+#   processor:
+#     image: "davidbliu/processor2"
+#     ports:
+#       ssh: 22
+#       api: 9000
+#     environment:
+#       configuration: "spout"
+#   ingestor_activities:
+#     image: "davidbliu/ingestor"
+#     ports:
+#       ssh: 22
+#       api: 9000
+#     cpu: 0.15

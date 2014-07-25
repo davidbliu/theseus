@@ -1,0 +1,23 @@
+<script type = 'text/javascript'>
+setTimeout(function () { location.reload(1); }, 3000);
+</script>
+<head>
+	<style type = 'text/css'>
+	.instance_name
+	{
+		margin-left: 25px;
+	}
+	.instance_info
+	{
+		margin-left: 75px;
+	}
+	</style>
+</head>
+
+<h1>Welcome Master {{ name }}</h1>
+
+<h2>here are the events</h2>
+{% for event in events %}
+<div>{{ event }}</div>
+{% endfor %}
+
