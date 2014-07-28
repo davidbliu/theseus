@@ -1,0 +1,52 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Docker-Mesos{% endblock %}
+{% block content %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<style type='text/css'>
+.wrapper{
+	padding: 20px;
+}
+#config-text{
+	padding:15px;
+}
+</style>
+<script type = 'text/javascript'>
+
+$(document).ready(function(){
+	$('#deploy-btn').click(function(){
+		r=confirm('deploy this group?');
+		if(r){
+			var config_data = $('#config').val();
+			 $.ajax({
+		          url:'/deploy_config',
+		          type: "POST",
+		          data: {"config_data": config_data}
+		        }).done(function(data){
+		            location.reload();
+		        }).fail(function(data){
+		            alert('failed');
+		        });
+				}
+			});
+});
+</script>
+
+
+<link rel="stylesheet"
+      type="text/css"
+      href="/static/index.css"/>
+<nav id = 'header' class="navbar navbar-default" role="navigation">
+
+	<div class='navbar-brand' id='theseus-title'><a href='/' style='text-decoration:none;color:white'>Dashboard</a></div>
+	<div class='navbar-brand'><a id = 'navbar-link' href = 'http://54.188.87.91:5050'>Mesos Dashboard</a></div>
+	<div class='navbar-brand'><a id='navbar-link' href = 'http://54.188.87.91:8080'>Marathon Dashboard</a></div>
+</nav>
+
+
+<div class = 'jumbotron wrapper'>
+<h2>configuration</h2>
+<div id='config-text'><textarea id='config' class="form-control" rows="25"></textarea></div>
+<div id = 'deploy-btn' class='btn btn-default'>Deploy</div>
+</div>
+<!-- end of wrapper -->
+{% endblock %}

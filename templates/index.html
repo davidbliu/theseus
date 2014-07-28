@@ -7,6 +7,7 @@
       type="text/css"
       href="/static/index.css"/>
 
+<script src="http://jsontoyaml.com/js/json2yaml.js"></script>
 <script language="javascript"
       type="text/javascript"
       src="/static/index.js"></script>
@@ -14,10 +15,22 @@
 
 
 <nav id = 'header' class="navbar navbar-default" role="navigation">
-	<div class='navbar-brand' id='theseus-title'>Dashboard</div>
+	<div class='navbar-brand' id='theseus-title'>
+		<i class='glyphicon glyphicon-home'></i>
+		<a href='/' style='text-decoration:none;color:white'>Dashboard</a></div>
 	<div class='navbar-brand'><a id = 'navbar-link' href = 'http://54.188.87.91:5050'>Mesos Dashboard</a></div>
 	<div class='navbar-brand'><a id='navbar-link' href = 'http://54.188.87.91:8080'>Marathon Dashboard</a></div>
+	<div class='navbar-brand'><a id='navbar-link' class='deploy-toggle-btn'>Deploy</a></div>
 </nav>
+
+<form id='filter-form' class='form-inline'>
+	<div class='form-group'>
+		<input id='service-input' type='text' class='form-control' style='width:300px' placeholder='service'>
+	</div>
+	<div class='form-group'>
+		<input id='label-input' type='text' class='form-control' style='width:300px' placeholder='labels'>
+	</div>
+</form>
 
 <div id='left-col' class='col-md-2'>
 <h2 style ='text-align:center'>Services</h2>
@@ -42,9 +55,17 @@
 	{% for group in groups %}
 
 		<div id = "{{ group.encode_marathon_id }}" class='labeled-group-div panel panel-default'>
+			<div class='group-controls'>
+				<i id='' class='plus-group-btn glyphicon glyphicon-plus group-btn'></i>
+				<i id='' class='minus-group-btn glyphicon glyphicon-minus group-btn'></i>
+				<i id='' class='remove-group-btn glyphicon glyphicon-remove group-btn'></i>
+				<i id='' class='edit-group-btn glyphicon glyphicon-pencil group-btn'>
+					<div style = 'display:none' class='hidden-config-yaml'>{{ group.config_yaml }}</div></i>
+			</div>
 			<ul class='labeled-group-list'>
 			<div><b>service </b>{{ group.service.name }}</div>
 			<div><b>labels </b>{{ group.labels }}</div>
+			<div><b>instances </b>{{ group.deploy_ids|length }}</div>
 			{% for key in group.config.keys() %}
 			<li>{{ key }}: {{ group.config[key] }}
 			</li>
@@ -93,11 +114,46 @@
 	 {% endif %}
 	 {% endfor %}
 	  	<!-- end of li for service -->
-
-
+</div>
 </div>
 
 
-</div>
+<div id='deploy-config-window'>
+<style type='text/css'>
+.wrapper{
+	padding: 20px;
+}
+#config-text{
+	padding:15px;
+}
+</style>
+<script type = 'text/javascript'>
 
+$(document).ready(function(){
+	$('#deploy-btn').click(function(){
+		r=confirm('deploy this group?');
+		if(r){
+			var config_data = $('#config').val();
+			 $.ajax({
+		          url:'/deploy_config',
+		          type: "POST",
+		          data: {"config_data": config_data}
+		        }).done(function(data){
+		            location.reload();
+		        }).fail(function(data){
+		            alert('failed');
+		        });
+				}
+			});
+});
+</script>
+<div class = 'jumbotron wrapper'>
+<h2>configuration</h2>
+<div id='config-text'><textarea id='config' class="form-control" rows="17"></textarea></div>
+<div id = 'deploy-btn' class='btn btn-default'>Deploy</div>
+<div id = 'deploy-cancel-btn' class='btn btn-default'>Cancel</div>
+</div>
+</div>
+<!-- end of deploy config window -->
+<div id='black-screen'></div>
 {% endblock %}

@@ -39,16 +39,15 @@ services:
   #   environment:
   #     MIN_NODES: 2
   #   volumes: ['/home/ser/ubuntu/volume-test:/opt/testvolume']
-  # haproxy:
-  #   labels: ['second', 'label_watcher']
-  #   image: 54.189.193.228:5000/haproxy
-  #   ports:
-  #     ssh: 22
-  #     proxy: 80
-  #     idk: 443
-  #     suscriber: 5000
-  #   environment:
-  #     PROXY_SERVICE: ingestor
-  #     PROXY_PORT: api
-  #     PROXY_LABELS: testing
-  #     WATCHES: ingestor
+  haproxy:
+    labels: ['main']
+    image: 54.189.193.228:5000/haproxy
+    ports:
+      ssh: 22
+      proxy: 80
+      idk: 443
+      suscriber: 5000
+    environment:
+      PROXY_SERVICE: ingestor
+      PROXY_PORT: api
+      WATCHES: ingestor

@@ -21,10 +21,8 @@ class Director:
 	def clean(self):
 		for key in self.services.keys():
 			service = self.services[key]
-			print 'cleaning '+str(service)
 			service.remove_undeployed_groups()
 			if service.labeled_groups is None or len(service.labeled_groups.keys()) == 0:
-				print 'pop this service '+service.name
 				self.services.pop(service.name, None)
 	def find_labeled_group(self, service_name, labels):
 		service = services.get(service_name)
@@ -77,29 +75,20 @@ class Service:
 		labeled_group = LabeledGroup(self, labels, config)
 		if existing_group is None:
 			# simple, deploy this onto marathon
-			print 'no prior groups found, deploying onto marathon'
 			labeled_group.deploy()
 		else:
 			# there is already one so you must replace it
-			print 'replacing existing labeled group'
-			print '     existing: '+str(existing_group)
-			print '     new: '+str(labeled_group)
-			# self.labeled_groups[str(labels)] = labeled_group
-			# rolling update
-			# replacer.rolling_replace(existing_group.encode_marathon_id, labeled_group)
 			replacer.rolling_replace_group(existing_group, labeled_group)
 		self.labeled_groups[str(labels)] = labeled_group
 		return labeled_group
 
 	def remove_undeployed_groups(self):
 		for label in self.labeled_groups.keys():
-			# print labels
 			group = self.labeled_groups[label]
 			if not group.is_deployed:
-				print str(group)+' is not deployed. erasing...'
 				self.labeled_groups.pop(label, None)
 			else:
-				print 'this group is deployed '+str(group)
+				print 'ok'
 	#
 	# idk what this returns
 	#
@@ -130,6 +119,16 @@ class LabeledGroup:
 	def __repr__(self):
 		return str(self.service) + ' labels ' + str(self.labels) + ' version '+str(self.version)
 
+	@property
+	def config_yaml(self):
+		yaml_dict = {}
+		whole_dict = {}
+		yaml_dict[self.service.name] = self.config
+		# yaml_dict[self.service.name]['labels'] = ast.literal_eval(self.config['labels'])
+		whole_dict['services'] = yaml_dict
+
+		# return yaml.dump(whole_dict)
+		return yaml.dump(whole_dict)
 	#
 	# returns marathon id for this labeled group
 	#
@@ -149,6 +148,8 @@ class LabeledGroup:
 		launcher.launch_group(self)
 	def undeploy(self):
 		launcher.unlaunch_group(self)
+	def scale(self, delta):
+		updater.update_group(self, delta)
 	#
 	# returns true if my id is found in ANY app ids
 	# will return true if you are multi-fixed-service and subset of all your apps are up
@@ -163,27 +164,6 @@ class LabeledGroup:
 				return True
 		return False
 
-	#
-	# unused
-	#
-	def clean_deploy_ids(self):
-		marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
-		apps = marathon_client.list_apps()
-		app_ids = [x.id for x in apps]
-		for deploy_id in self.deploy_ids:
-			if not deploy_id in app_ids:
-				print 'deploy_id is not in app id! '+str(deploy_id)
-				# remove deploy id
-
-	@property
-	def get_marathon_app_id(self):
-		marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
-		apps = marathon_client.list_apps()
-		my_encoded_id = self.encode_marathon_id
-		for app in apps:
-			if app.id == my_encoded_id:
-				return app.id
-		return None
 	
 # 
 # gets a service and labels from marathon id

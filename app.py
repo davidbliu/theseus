@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import ast
 import pickle
+
 #
 # import custom stuff
 #
@@ -32,8 +33,6 @@ services = []
 #
 @app.route('/', methods=['GET', 'POST'])
 def root():
-
-
 	global director
 	director = load_director()
 	director.clean()
@@ -47,7 +46,6 @@ def root():
 		print 'query was '+query_service+' '+ str(query_labels)
 	except Exception as failure:
 		print failure
-		print 'no query parameters'
 		query_labels = []
 		query_service = None
 
@@ -75,6 +73,58 @@ def root():
 										registered = get_etcd_data(query_labels, query_service), 
 										query_labels = query_labels, 
 										query_service=query_service)
+@app.route('/remove', methods = ['POST'])
+def remove():
+	try:
+		director = load_director()
+		group_id = request.form['group_id']
+		decoded = entities.decode_marathon_id(group_id)
+		service = decoded['service']
+		labels = str(sorted(decoded['labels']))
+		group = director.services.get(service).labeled_groups.get(labels)
+		group.undeploy()
+		director.dump()
+		return jsonify(result={"status": 200})
+	except Exception as failure:
+		print failure
+		return jsonify(result={"status": 500})
+
+@app.route('/add_group', methods=['POST'])
+def add_group():
+	try:
+		director = load_director()
+		group_id = request.form['group_id']
+		delta = int(request.form['delta'])
+		decoded = entities.decode_marathon_id(group_id)
+		service = decoded['service']
+		labels = str(sorted(decoded['labels']))
+		group = director.services.get(service).labeled_groups.get(labels)
+		#
+		# scale up this grouop
+		#
+		group.scale(delta)
+		director.dump()
+		return jsonify(result={"status": 200})
+	except Exception as failure:
+		print failure
+		return jsonify(result={"status": 500})
+@app.route('/deploy', methods=['GET', 'POST'])
+def deploy():
+	return render_template('deploy.html')
+
+#
+# recieves config string, deploy this labeled group
+#
+@app.route('/deploy_config', methods=['GET', 'POST'])
+def deploy_config():
+	config_data = request.form.get('config_data')
+	data = yaml.load(config_data)
+	orchestrator.update_services(director, data)
+	return jsonify(result={"status": 200})
+
+@app.route('/undeploy', methods=['GET', 'POST'])
+def undeploy():
+	print 'not implemented yet'
 
 def get_etcd_data(query_labels = [], query_service = 'None'):
 	registered = {}
@@ -89,14 +139,11 @@ def get_etcd_data(query_labels = [], query_service = 'None'):
 			try:
 				full_instances_dict = etcd_client.read('/'+service).value
 				full_instances_dict = ast.literal_eval(full_instances_dict)
-				
 				for instance in full_instances_dict.keys():
 					labels = full_instances_dict[instance]['labels']
-					print 'labels are '+str(labels)
 					add = True
 					for label in query_labels:
 						if label not in labels:
-							print 'missing a label'+str(label)
 							add = False
 					if add:
 						registered[service][instance] = full_instances_dict[instance]
@@ -118,4 +165,6 @@ if __name__ == '__main__':
 	data = yaml.load(open('mesos.yaml', 'r'))
 	director = load_director()
 	host = 'localhost'
+
+	print 'running your app on '+str(host)
 	app.run(port=5001, host=host)

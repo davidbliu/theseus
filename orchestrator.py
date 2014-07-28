@@ -25,21 +25,30 @@ def sync_subscriber():
 	# print subscriber_address
 	r = requests.post(subscriber_address, data={'config_data':json.dumps(config_data)})
 
-def update_services(director):
-	services = director.services
+def load_config():
 	data = yaml.load(open('added_configuration.yaml', 'r'))
-	print 'updating services'
+	return data
+
+def update_services(director, data):
+	services = director.services
 	if data.get('services') is None:
 		return
 	for serv in data['services'].keys():
-
 		config = data['services'][serv]
 		service = director.services.get(serv)
 		if not service:
-			print 'this is a new service: '+str(service)
 			service = entities.Service(serv)
 			director.services[serv] = service
 		service.create_labeled_group(config['labels'], config)
+	#
+	# save director
+	#
+	director.dump()
+	#
+	# save current config
+	#
+	director.flush_config('saved_config.yaml')
+	sync_subscriber()
 
 def print_topo(director):
 	print 'wtf'
@@ -73,7 +82,7 @@ def deploy():
 	#
 	director.clean()
 	print '>>>>>>>>>>>>>> CLEAN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-	update_services(director)
+	update_services(director, load_config())
 	#
 	# save director
 	#
