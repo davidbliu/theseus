@@ -5,4 +5,4 @@ Docker container management framework built on top of Marathon
 
 ## Explanation
 Theseus is a lightweight framework to control marathon, making it easy for developers to deploy and keep track of containers.
-__name: __ the ship of Theseus is a thought experiment. If a ship has all its components replaced, is it still the same ship? Theseus will keep your Dockerized services running even if all the component containers are in flux.
+__name__ the ship of Theseus is a thought experiment. If a ship has all its components replaced, is it still the same ship? Theseus will keep your Dockerized services running even if all the component containers are in flux.
