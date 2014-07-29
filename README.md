@@ -19,3 +19,4 @@ The ship of Theseus is a thought experiment: if a ship has all its components re
 ## In Progress
 * monitoring container performance + metrics
 * log rolling -> viewing
+* machine-centric view (what processes are running on what machines etc)
