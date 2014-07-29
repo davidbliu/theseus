@@ -17,6 +17,7 @@ def sync_subscriber():
 	data = yaml.load(open('mesos.yaml', 'r'))
 	subscriber_address = 'http://'+data['subscriber']['host']+':'+str(data['subscriber']['port'])+'/reconfigure'
 
+	print 'this is my subscribe address'+str(subscriber_address)
 	mesos_data = yaml.load(open('mesos.yaml', 'r'))
 	config_data = yaml.load(open('saved_config.yaml', 'r'))
 	config_data = dict(mesos_data.items() + config_data.items())

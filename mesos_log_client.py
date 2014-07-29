@@ -11,7 +11,7 @@ host = data['marathon']['host']
 
 
 def get_log_url(task_id):
-	r = requests.get('http://54.188.87.91:5050/state.json')
+	r = requests.get('http://'+host+':'+str(port)+'/state.json')
 	state = json.loads(r.content)
 
 	# print state['frameworks']
