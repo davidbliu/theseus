@@ -89,3 +89,10 @@ font-size: 13px;
 .deploy-toggle-btn{
 	cursor: pointer;
 }
+.container-glyph{
+	float:right;
+}
+.container-glyph:hover{
+	cursor:pointer;
+	color:#67AF5D;
+}

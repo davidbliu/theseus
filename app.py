@@ -13,12 +13,13 @@ import shutil
 import subprocess
 import ast
 import pickle
-
+import json
 #
 # import custom stuff
 #
 import Entities as entities  
 import orchestrator
+import mesos_log_client
 from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
@@ -126,6 +127,26 @@ def deploy_config():
 def undeploy():
 	print 'not implemented yet'
 
+
+#
+# AJAX stuff
+#
+@app.route('/get_log_url',methods=['GET','POST'])
+def get_log_url():
+	print 'here i am'
+	try:
+
+		task_id =  str(request.args.get('task_id'))
+		# print task_id
+		# print 'that was task id'
+		return json.dumps(mesos_log_client.get_log_url(task_id))
+	except Exception as failure:
+		print failure
+		return jsonify(result={'status':500})
+#
+# default no queries
+# gets container info that matches your query
+#
 def get_etcd_data(query_labels = [], query_service = 'None'):
 	registered = {}
 	#

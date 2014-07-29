@@ -21,6 +21,8 @@
 	<div class='navbar-brand'><a id = 'navbar-link' href = 'http://54.188.87.91:5050'>Mesos Dashboard</a></div>
 	<div class='navbar-brand'><a id='navbar-link' href = 'http://54.188.87.91:8080'>Marathon Dashboard</a></div>
 	<div class='navbar-brand'><a id='navbar-link' class='deploy-toggle-btn'>Deploy</a></div>
+	<div class='navbar-brand'><a id='navbar-link' class='metrics-btn'>Cluster</a></div>
+	<div class='navbar-brand'><a id='navbar-link' class='metrics-btn'>Metrics</a></div>
 </nav>
 
 <form id='filter-form' class='form-inline'>
@@ -65,7 +67,6 @@
 			<ul class='labeled-group-list'>
 			<div><b>service </b>{{ group.service.name }}</div>
 			<div><b>labels </b>{{ group.labels }}</div>
-			<div><b>instances </b>{{ group.deploy_ids|length }}</div>
 			{% for key in group.config.keys() %}
 			<li>{{ key }}: {{ group.config[key] }}
 			</li>
@@ -103,13 +104,16 @@
 							{% endfor %}
 					</ul>
 					<!-- end of list of ports -->
+					<i id="{{ registered[service][instance]['instance_name'] }}" class='view-log-btn glyphicon glyphicon-file container-glyph'>logs</i>
 				</div>
 				{% if registered[service][instance]['labels']|length != 0 %}
 				<div>labels: {{registered[service][instance]['labels'] }}</div>
 				{% endif %}
+
 	    	</div>
 	    	<!-- end of service instance -->
 	    	 {% endfor %}
+
 	  	</div>
 	 {% endif %}
 	 {% endfor %}
@@ -156,4 +160,5 @@ $(document).ready(function(){
 </div>
 <!-- end of deploy config window -->
 <div id='black-screen'></div>
+<div id='dialogue'></div>
 {% endblock %}

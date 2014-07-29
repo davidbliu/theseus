@@ -41,6 +41,36 @@ function display_deploy_config(config){
 		$("#config").val(config);
 	}
 }
+function copyToClipboard(text) {
+  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+}
+function view_log_actions(){
+	$('.view-log-btn').click(function(){
+		var task_id = $(this).attr('id');
+		var url_string = '/get_log_url';
+		$.ajax({
+		      url: '/get_log_url',
+		      type: "GET",
+		      data: {task_id: task_id},
+		      success:function(d){
+		      	// var link = '<a href ="'+d+'">link to logs</a>';
+		      	// $('#dialogue').dialog(d);
+
+		      	// console.log(d);
+		      	// console.log(d.length);
+		      	var end = d.length -1;
+		      	// console.log(d.substring(1,end));
+		      	copyToClipboard(d.substring(1, end));
+		      	// alert(d);
+		      	// alert(link);
+		      	// $('')
+		      },
+		      error:function (xhr, textStatus, thrownError){
+		      	alert('failed');
+		      }
+		  });
+	});
+}
 $(document).ready(function(){
 	$('#service-input').keyup(function(e){
 	    if(e.keyCode == 13)
@@ -113,6 +143,6 @@ $(document).ready(function(){
 	$("#deploy-cancel-btn").click(function(){
 		display_deploy_config('none');
 	});
-
+	view_log_actions();
 
 });
