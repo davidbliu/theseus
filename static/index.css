@@ -89,8 +89,12 @@ font-size: 13px;
 .deploy-toggle-btn{
 	cursor: pointer;
 }
-.container-glyph{
+.container-glyph-wrapper{
 	float:right;
+	bottom:10px;
+}
+.container-glyph{
+	top:-15px;
 }
 .container-glyph:hover{
 	cursor:pointer;

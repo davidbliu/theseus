@@ -1,5 +1,6 @@
 services:
   presenter:
+    labels: ['dev']
     image: 54.189.193.228:5000/flask
     ports:
       ssh: 22
@@ -21,12 +22,12 @@ services:
       TABLE_NAME: 'flask_table2'
     instances: 3
     cpus: 0.1 
-    mem: 32
-    labels: ['testing']
+    mem: 128
+    labels: ['dev']
 
 services:
   haproxy:
-    labels: ['testing']
+    labels: ['dev']
     image: 54.189.193.228:5000/haproxy
     ports:
       ssh: 22
@@ -41,7 +42,7 @@ services:
 
 services:
   cassandra:
-    image: 54.189.193.228:5000/cassandra #-processor-s # this version has subscriber
+    image: 54.189.193.228:5000/cassandra 
     ports-hard:
       storage: 7000
       native: 9042
@@ -52,13 +53,13 @@ services:
     environment:
       MIN_NODES: 2
     volumes: ['/home/ser/ubuntu/volume-test:/opt/testvolume']
-    labels: ['testing']
+    labels: ['dev']
 services:
   watcher:
     labels: ['dev']
     image: 54.189.193.228:5000/watcher
     cpus: 0.1
-    mem: 32
+    mem: 128
     environment: 
       WATCHES: 'ingestor,ingestor.testing,cassandra,haproxy,haproxy.version2,presenter'
 

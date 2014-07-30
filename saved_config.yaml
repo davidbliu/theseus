@@ -10,15 +10,19 @@ cassandra:
     volumes: ['/home/ser/ubuntu/volume-test:/opt/testvolume']
 haproxy:
   '[''dev'']':
+    cpu: 0.3
     environment: {PROXY_PORT: api, PROXY_SERVICE: ingestor, WATCHES: ingestor}
     image: 54.189.193.228:5000/haproxy
     labels: [dev]
+    mem: 128
     ports: {idk: 443, proxy: 80, ssh: 22, suscriber: 5000}
   '[''testing'']':
+    cpu: 0.3
     environment: {PROXY_LABELS: testing, PROXY_PORT: api, PROXY_SERVICE: ingestor,
       WATCHES: ingestor}
     image: 54.189.193.228:5000/haproxy
     labels: [testing]
+    mem: 128
     ports: {idk: 443, proxy: 80, ssh: 22, suscriber: 5000}
 ingestor:
   '[''dev'']':
@@ -27,15 +31,16 @@ ingestor:
     image: 54.189.193.228:5000/flask
     instances: 3
     labels: [dev]
-    mem: 32
+    mem: 128
     ports: {api: 5000, ssh: 22}
   '[''testing'']':
     cpus: 0.1
-    environment: {APP_NAME: asdf, KEYSPACE_NAME: flask_keyspace2, TABLE_NAME: flask_table2}
+    environment: {APP_NAME: Ingestor Testing SHakira, KEYSPACE_NAME: flask_keyspace2,
+      TABLE_NAME: flask_table2}
     image: 54.189.193.228:5000/flask
-    instances: 4
+    instances: 3
     labels: [testing]
-    mem: 32
+    mem: 128
     ports: {api: 5000, ssh: 22}
 presenter:
   '[''dev'']':
@@ -44,3 +49,11 @@ presenter:
     image: 54.189.193.228:5000/flask
     labels: [dev]
     ports: {api: 5000, ssh: 22}
+watcher:
+  '[''dev'']':
+    cpus: 0.1
+    environment: {WATCHES: 'ingestor,ingestor.testing,cassandra,haproxy,haproxy.version2,presenter'}
+    image: 54.189.193.228:5000/watcher
+    instances: 1
+    labels: [dev]
+    mem: 128

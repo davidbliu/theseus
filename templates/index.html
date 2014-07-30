@@ -104,7 +104,11 @@
 							{% endfor %}
 					</ul>
 					<!-- end of list of ports -->
-					<i id="{{ registered[service][instance]['instance_name'] }}" class='view-log-btn glyphicon glyphicon-file container-glyph'>logs</i>
+					<div class='container-glyph-wrapper'>
+					<i id="{{ registered[service][instance]['instance_name'] }}" class='view-log-btn glyphicon glyphicon-file container-glyph'>logs</i><br>
+					<i id="{{ registered[service][instance]['instance_name'] }}" class='view-log-btn glyphicon glyphicon-stats container-glyph'>stats</i>
+					</div>
+
 				</div>
 				{% if registered[service][instance]['labels']|length != 0 %}
 				<div>labels: {{registered[service][instance]['labels'] }}</div>
