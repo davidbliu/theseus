@@ -1,16 +1,17 @@
 etcd:
   # host: 54.189.223.174
-  host: 54.176.99.67
+  # host: 54.176.99.67
+  host: 54.193.154.204
   port: 4001
 marathon:
   # host: 54.188.87.91
   # host: localhost
   # host: 10.0.2.15
   # port: 8080
-  host: 54.176.99.67
+  host: localhost
   port: 8080
 subscriber:
   # host: 54.184.184.23
-  host: 54.176.99.67
+  host: localhost
   # host: localhost
   port: 5000

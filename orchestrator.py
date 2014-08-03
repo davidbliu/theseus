@@ -1,140 +1,128 @@
-import Entities as entities
+# import Entities as entities
+import etcd_driver
 import yaml
 import uuid
-import pickle
 import json
 import requests
 import argparse
-# services = []
 #
-# load default services from config. these can be modified in-app
-# returns a list of services
+# import modules
 #
+import namespacer, launcher, replacer
 
-
-def sync_subscriber():
-	print 'syncing subscriber'
-	data = yaml.load(open('mesos.yaml', 'r'))
-	subscriber_address = 'http://'+data['subscriber']['host']+':'+str(data['subscriber']['port'])+'/reconfigure'
-
-	print 'this is my subscribe address'+str(subscriber_address)
-	mesos_data = yaml.load(open('mesos.yaml', 'r'))
-	config_data = yaml.load(open('saved_config.yaml', 'r'))
-	config_data = dict(mesos_data.items() + config_data.items())
-	payload = {'config_data': json.dumps(config_data)}
-	# print 'sending post request here...'
-	# print subscriber_address
-	r = requests.post(subscriber_address, data={'config_data':json.dumps(config_data)})
-
-def load_config():
-	data = yaml.load(open('added_configuration.yaml', 'r'))
+#
+# service keys group keysgroup containers list
+#
+def get_all_data():
+	data = {}
+	service_names = etcd_driver.get_service_names()
+	for service_name in service_names:
+		service_dict = {}
+		service_groups = etcd_driver.get_service_groups(service_name)
+		for group in service_groups:
+			group_containers = []
+			for container_name in etcd_driver.get_group_container_names(service_name, group):
+				container_data = {}
+				container_data['name'] = container_name
+				container_data['info'] = etcd_driver.get_container_info(service_name, group, container_name)
+				group_containers.append(container_data)
+			service_dict[group] = group_containers
+		data[service_name]  = service_dict
 	return data
 
-def update_services(director, data):
-	services = director.services
+
+#
+# consume data, if new services, create new
+# if old and old group, replace it
+#
+def update_services(data):
 	if data.get('services') is None:
+		print 'must have services key'
 		return
 	for serv in data['services'].keys():
 		config = data['services'][serv]
-		service = director.services.get(serv)
-		if not service:
-			service = entities.Service(serv)
-			director.services[serv] = service
-		service.create_labeled_group(config['labels'], config)
-	#
-	# save director
-	#
-	director.dump()
-	#
-	# save current config
-	#
-	director.flush_config('saved_config.yaml')
-	sync_subscriber()
+		#
+		# create new group
+		#
+		service_name = serv
+		labels = data['services'][serv]['labels']
 
-def print_topo(director):
-	print 'wtf'
-	for service in director.services:
-		for labeled_group in service.labeled_groups:
-			labels = labeled_group.labels
-			print 'service '+str(service)+ 'labels '+str(labels)
-			print  service.get_deployed_labeled_group_ids(labels)
-			print [labeled_group.encode_marathon_id]
-			print labeled_group.is_deployed
-	print 'here are your groups'
-	for group in director.find_labeled_groups('cassandra', ['main', 'tiny']):
-		print group
-
-# def flush_data():
-
-def load_director():
-	director = None
-	with open('director.pkl', 'rb') as input:
-			director = pickle.load(input)
-	return director
+		
+		encoded_group_labels = namespacer.encode_labels(labels)
+		if etcd_driver.group_exists(service_name, encoded_group_labels):
+			old_config = etcd_driver.get_group_config(service_name, encoded_group_labels)
+			unmatched_items = set(convert_dict_values_to_strings(old_config).items()) ^ set(convert_dict_values_to_strings(config).items())
+			should_update = False
+			# print unmatched_items
+			for item in unmatched_items:
+				if item[0] != 'instances':
+					should_update = False
+			if len(unmatched_items)==0:
+				should_update = False
+			if should_update:
+				print 'updating group...'
+				scale(service_name, labels, config)
+			else:
+				print 'rolling update...'
+				deploy_existing(service_name, labels, config)
+		else:
+			print 'creating new group...'
+			deploy_new(service_name, encoded_group_labels, config)
 
 
-def deploy():
-	#
-	# load director if he exists
-	#
-	director = load_director()
-	#
-	# clean up director
-	#
-	director.clean()
-	print '>>>>>>>>>>>>>> CLEAN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
-	update_services(director, load_config())
-	#
-	# save director
-	#
-	director.dump()
-	#
-	# save current config
-	#
-	director.flush_config('saved_config.yaml')
-	sync_subscriber()
 
-def undeploy(service_name, labels = []):
-	director = load_director()
-	director.clean()
-	print director.services
-	serv = director.services.get(service_name)
-	if serv is None:
-		print 'serv is none'
-		return
-	group = serv.labeled_groups.get(str(sorted(labels)))
-	if group:
-		group.undeploy()
-		print 'undeployed'
-	else:
-		print 'no group'
-	director.dump()
-	director.flush_config('saved_config.yaml')
-	sync_subscriber()
+
+def deploy_new(service_name, encoded_group_labels, config):
+	# custom constraints handled in launcher
+	launcher.launch_group(service_name, encoded_group_labels, config)
+
+def get_existing_marathon_apps(service_name, encoded_group_labels):
+	existing_containers = etcd_driver.get_group_container_names(service_name, encoded_group_labels)
+	existing_marathon_apps = []
+	for container in existing_containers:
+		app_id = namespacer.get_app_from_task(container)
+		if app_id not in existing_marathon_apps:
+			existing_marathon_apps.append(app_id)
+	return existing_marathon_apps
+def deploy_existing(service_name, labels, config):
+	encoded_group_labels = namespacer.encode_labels(labels)
+	existing_marathon_apps = get_existing_marathon_apps(service_name, encoded_group_labels)
+	#
+	# update existing apps
+	#
+	replacer.rolling_replace_group(service_name, labels, config, existing_marathon_apps)
+def undeploy(service_name, labels):
+	encoded_group_labels = namespacer.encode_labels(labels)
+	existing_marathon_apps = get_existing_marathon_apps(service_name, encoded_group_labels)
+	for app in existing_marathon_apps:
+		launcher.unlaunch_app(app)
+def scale(service_name, labels, config):
+	encoded_group_labels = namespacer.encode_labels(labels)
+	existing_marathon_apps = get_existing_marathon_apps(service_name, encoded_group_labels)
+	launcher.update_group(service_name, labels, config, existing_marathon_apps)
+
+def manual_update():
+	data = yaml.load(open('added_configuration.yaml', 'r'))
+	# print data
+	update_services(data)
+
+
+#
+# helper methods
+#
+def convert_dict_values_to_strings(dictionary):
+	new_dict = {}
+	for key in dictionary.keys():
+		new_dict[key] = str(dictionary[key])
+	return new_dict
 
 if __name__ == "__main__":
-    print 'Welcome Master Liu'
-    sync_subscriber()
-    parser = argparse.ArgumentParser(description='Docker Orchestrator Launcher')
-    parser.add_argument('-s', '--service-name', required=True, help='service name')
-    parser.add_argument('-c', '--command', required=True, help='command')
-    parser.add_argument('-l', '--labels', required=False, help='command')
-    args = parser.parse_args()
-    service = args.service_name
-    command = args.command
-
-    if command == 'deploy':
-    	deploy()
-    elif command == 'undeploy':
-    	# labels = ['dragons','fairydust','hello','ponies']
-    	label_list = args.labels
-    	if label_list is None or label_list is "":
-    		labels = []
-    	else:
-    		labels = label_list.split(',')
-    	service = 'my_name_is_david'
-    	undeploy(service, labels)
-    	# undeploy(service)
-    	#
-    	# test undeploy functionalitiy
-    	#
+	print 'Welcome Master Liu'
+	manual_update()
+	# data = yaml.load(open('added_configuration.yaml', 'r'))
+	# service_name = 'ingestor'
+	# labels = data['services'][service_name]['labels'
+	# undeploy(service_name, labels)
+	#
+	# try update functionality
+	#
