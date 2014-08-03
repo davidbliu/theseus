@@ -1,0 +1,106 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Docker-Mesos{% endblock %}
+{% block content %}
+
+<link rel="stylesheet"
+      type="text/css"
+      href="/static/index.css"/>
+
+
+
+
+
+<nav id = 'header' class="navbar navbar-default" role="navigation">
+	<div class='navbar-brand' id='theseus-title'>
+		<i class='glyphicon glyphicon-home'></i>
+		<a href='/' style='text-decoration:none;color:white'>Dashboard</a></div>
+	<div class='navbar-brand'><a id = 'navbar-link' href = '{{mesos_url}}'>Mesos</a></div>
+	<div class='navbar-brand'><a id='navbar-link' href = '{{marathon_url}}'>Marathon</a></div>
+	<div class='navbar-brand'><a id='navbar-link' href = '{{etcd_url}}'>Etcd</a></div>
+	<div class='navbar-brand'><a id='navbar-link' class='metrics-btn'>Cluster</a></div>
+	<div class='navbar-brand'><a id='navbar-link' class='metrics-btn'>Metrics</a></div>
+</nav>
+
+
+
+
+
+
+<div id='left-col' class='col-md-2'>
+<h2 style ='text-align:center'>Services</h2>
+<div id='service-list-wrapper'>
+	<ul class="list-group">
+		{% for service_name in data.keys() %}
+
+			<li class='list-group-item service-button'>{{ service_name }}</li>
+
+		{% endfor %}
+	</ul>
+</div>
+</div>
+
+
+<div id='mid-col'class='col-md-6'>
+<h2 style ='text-align:center'>Configuration</h2>
+<div id='configuration-viewer'>
+
+	{% for service in data.keys() %}
+	{% for group in data[service].keys() %}
+	{% with config=data[service][group]['config'] %}
+		<div id = "" class='labeled-group-div panel panel-default'>
+			<ul class='labeled-group-list'>
+			<div><b>service </b>{{ service }}</div>
+			<div><b>labels </b>{{ group }}</div>
+			{% for key in config.keys() %}
+			<li>{{ key }}: {{ config[key] }}
+			</li>
+			{% endfor %}
+			</ul>
+
+		</div>
+	{% endwith %}
+	{% endfor %}
+	{% endfor %}
+</div>
+</div>
+
+
+<div id='right-col' class='col-md-4'>
+<h2 style ='text-align:center'>Containers</h2>
+<div id='etcd-data-wrapper'>
+
+
+	{% for service in data.keys() %}
+	{% for group in data[service].keys() %}
+		  <div clas='panel panel-default'>
+
+		  <div class='label label-default'>{{ service }}</div>
+		    {% for i in data[service][group]['containers'] %}
+		    {% with instance=i['info'] %}
+		    <div id='instance-detail-list' class = 'panel panel-default'>
+		    	<b>{{ instance['instance_name'] }}</b>
+		    	<div>host: {{ instance['instance_host'] }}</div>
+				<div>ports: 
+					<ul>
+						{% for key in instance['port_mapping'].keys() %}
+							<li class = 'port-li'>{{ key }}: <a href="http://{{ instance['instance_host'] }}:{{ instance['port_mapping'][key]['external'][1][:-4] }}">{{ instance['instance_host'] }}:{{ instance['port_mapping'][key]['external'][1][:-4] }}</a>
+							</li>
+							{% endfor %}
+					</ul>
+					<!-- end of list of ports -->
+				</div>
+
+	    	</div>
+	    	<!-- end of service instance -->
+	    	{% endwith %}
+	    	 {% endfor %}
+
+	  	</div>
+  	{% endfor %}
+	 {% endfor %}
+	  	<!-- end of li for service -->
+</div>
+</div>
+
+
+{% endblock %}
