@@ -1,12 +1,15 @@
 {% extends "bootstrap/base.html" %}
 {% block title %}Docker-Mesos{% endblock %}
 {% block content %}
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <link rel="stylesheet"
       type="text/css"
       href="/static/index.css"/>
 
 
+<script language="javascript"
+      type="text/javascript"
+      src="/static/viewer.js"></script>
 
 
 
@@ -88,6 +91,9 @@
 							{% endfor %}
 					</ul>
 					<!-- end of list of ports -->
+				</div>
+				<div class='container-glyph-wrapper'>
+					<i id="{{ instance['instance_name'] }}" class='view-log-btn glyphicon glyphicon-file container-glyph'>logs</i>
 				</div>
 
 	    	</div>
