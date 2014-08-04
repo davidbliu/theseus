@@ -36,41 +36,44 @@ def get_all_data():
 # if old and old group, replace it
 #
 def update_services(data):
-	if data.get('services') is None:
-		print 'must have services key'
-		return
-	for serv in data['services'].keys():
-		config = data['services'][serv]
-		#
-		# create new group
-		#
-		service_name = serv
-		labels = data['services'][serv]['labels']
-
-		
-		encoded_group_labels = namespacer.encode_labels(labels)
-		if etcd_driver.group_exists(service_name, encoded_group_labels):
-			old_config = etcd_driver.get_group_config(service_name, encoded_group_labels)
-			unmatched_items = set(convert_dict_values_to_strings(old_config).items()) ^ set(convert_dict_values_to_strings(config).items())
-			should_update = False
-			# print unmatched_items
-			for item in unmatched_items:
-				if item[0] != 'instances':
+	if data.get('deploy'):
+		for serv in data['deploy'].keys():
+			config = data['deploy'][serv]
+			#
+			# create new group
+			#
+			service_name = serv
+			labels = data['deploy'][serv]['labels']
+			encoded_group_labels = namespacer.encode_labels(labels)
+			if etcd_driver.group_exists(service_name, encoded_group_labels):
+				old_config = etcd_driver.get_group_config(service_name, encoded_group_labels)
+				unmatched_items = set(convert_dict_values_to_strings(old_config).items()) ^ set(convert_dict_values_to_strings(config).items())
+				should_update = True
+				print unmatched_items
+				for item in unmatched_items:
+					if item[0] != 'instances':
+						should_update = False
+						print type(item[1])
+						print item[1]
+				if len(unmatched_items)==0:
 					should_update = False
-			if len(unmatched_items)==0:
-				should_update = False
-			if should_update:
-				print 'updating group...'
-				scale(service_name, labels, config)
+				if should_update:
+					print 'updating group...'
+					scale(service_name, labels, config)
+				else:
+					print 'rolling update...'
+					deploy_existing(service_name, labels, config)
 			else:
-				print 'rolling update...'
-				deploy_existing(service_name, labels, config)
-		else:
-			print 'creating new group...'
-			deploy_new(service_name, encoded_group_labels, config)
+				print 'creating new group...'
+				deploy_new(service_name, encoded_group_labels, config)
 
-
-
+	if data.get('remove'):
+		for serv in data['remove'].keys():
+			service_name = serv
+			labels = data['remove'][serv]['labels']
+			print 'removing...'
+			undeploy(service_name, labels)
+			print '\t'+'removed '+str(service_name)+' '+str(labels)
 
 def deploy_new(service_name, encoded_group_labels, config):
 	# custom constraints handled in launcher
@@ -101,8 +104,8 @@ def scale(service_name, labels, config):
 	existing_marathon_apps = get_existing_marathon_apps(service_name, encoded_group_labels)
 	launcher.update_group(service_name, labels, config, existing_marathon_apps)
 
-def manual_update():
-	data = yaml.load(open('added_configuration.yaml', 'r'))
+def manual_update(config_file = 'added_configuration.yaml'):
+	data = yaml.load(open(config_file, 'r'))
 	# print data
 	update_services(data)
 
@@ -113,12 +116,27 @@ def manual_update():
 def convert_dict_values_to_strings(dictionary):
 	new_dict = {}
 	for key in dictionary.keys():
-		new_dict[key] = str(dictionary[key])
+		curr_item = dictionary[key]
+		if type(curr_item) == dict:
+			# print 'item is a dict'
+			sorted_keys = sorted(curr_item.keys())
+			keystring = str(sorted_keys)
+			itemlist = []
+			for k in sorted_keys:
+				itemlist.append(curr_item[k])
+			itemstring = str(itemlist)
+			new_dict[key] = keystring+itemstring
+		else:
+			new_dict[key] = str(curr_item)
 	return new_dict
 
 if __name__ == "__main__":
 	print 'Welcome Master Liu'
-	manual_update()
+	parser = argparse.ArgumentParser(description='Theseus')
+	parser.add_argument('-f', '--config-file', required=True, help='configuration file')
+	args = parser.parse_args()
+	config_file = args.config_file
+	manual_update(config_file)
 	# data = yaml.load(open('added_configuration.yaml', 'r'))
 	# service_name = 'ingestor'
 	# labels = data['services'][service_name]['labels'

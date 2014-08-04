@@ -1,23 +1,27 @@
-services:
+remove:
+  # haproxy:
+  #   labels: ['dev']
+  #   image: 54.189.193.228:5000/haproxy
+  #   ports:
+  #     ssh: 22
+  #     proxy: 80
+  #     idk: 443
+  #     suscriber: 5000
+  #   environment:
+  #     PROXY_SERVICE: ingestor
+  #     PROXY_PORT: api
+  #     WATCHES: ingestor
+  #   instances: 3
   ingestor:
-    # custom_constraints: fixed-host
-    labels: ['testing','another']
-    image: 54.189.193.228:5000/tester
-    ports: 
-      ssh: 22
-    environment:
-      # APP_NAME: Charles Dickens
-      # KEYSPACE_NAME: 'flask_keyspace2'
-      # TABLE_NAME: 'flask_table2'
-    instances: 1
-    cpus: 0.1 
-    mem: 128
-  # ingestor_another:
-  #     labels: ['ha']
-  #     image: 54.189.193.228:5000/tester
-  #     ports: 
-  #       ssh: 22
-  #     environment:
-  #     instances: 1
-  #     cpus: 0.1 
-  #     mem: 128
+  #   image: 54.189.193.228:5000/flask
+  #   ports: 
+  #     ssh: 22
+  #     api: 5000
+  #   environment:
+  #     APP_NAME: Ingestor
+  #     KEYSPACE_NAME: 'flask_keyspace2'
+  #     TABLE_NAME: 'flask_table2'
+  #   instances: 4
+  #   cpus: 0.1 
+  #   mem: 128
+    labels: ['dev']
