@@ -19,7 +19,7 @@ The ship of Theseus is a thought experiment: if a ship has all its components re
 
 ## Example Configuration
 
-'''yaml
+```yaml
 deploy:
   ingestor:
     image: 54.189.193.228:5000/flask
@@ -34,7 +34,7 @@ deploy:
     cpus: 0.1 
     mem: 128
     labels: ['dev']
-'''
+```
 
 
 ## In Progress
