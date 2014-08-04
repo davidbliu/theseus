@@ -10,12 +10,12 @@ The ship of Theseus is a thought experiment: if a ship has all its components re
 
 ## Getting started
 1. fill out mesos.yaml with marathon host and ip, etcd host and ip, and subscriber host and ip
-2. run python app.py from the root directory
-3. use web ui at localhost:5000 to control containers
-  * deploy new containers with deploy button 
-  * need to provide declarative specification for container. an example is given in configuration.yaml
-  * services can be scaled, updated, replaced, tagged with different labels
-  * query for services or labels with inputs at top
+2. create config file with what applications you want to create, update, or destroy (example: added_configuration.yaml)
+3. deploy applications 
+ * python orchestrator.py ((config_file_path))
+4. viewer
+ * python viewer.py
+ * localhost:5001
 
 ## In Progress
 * monitoring container performance + metrics
