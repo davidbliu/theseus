@@ -8,7 +8,7 @@ Theseus is a lightweight framework to control marathon, making it easy for devel
 It handles __namespacing__ (services and labeled groups) and __basic scheduling tasks__ (rolling update, restarting killed tasks on previous host, custom constraints)
 The ship of Theseus is a thought experiment: if a ship has all its components replaced, is it still the same ship? Theseus will keep your Dockerized services running even if all the component containers are in flux.
 
-motivation for theseus: marathon is not the ideal container-friendly interface for deploying and organizing dockerized applications. 
+__motivation for theseus:__ marathon is not the ideal container-friendly interface for deploying and organizing dockerized applications. 
 it has concepts of apps and tasks but doesn't explicitly support services and groups. Therefore, a lightweight framework on top of marathon 
 to handle these tasks provides a robust way to manage docker containers. Since marathon is in flux and will soon accommodate namespacing and 
 even scheduling tasks like rolling updates, this framework is even more crucial. instead of changing how developers interface with marathon 
