@@ -27,6 +27,16 @@ the same even with changes to marathon.
 
 ## Example Configuration
 
+* deploy 
+  * deploys new apps. if the labeled group is already deployed, theseus will perform a rolling update
+  * if you are only adding instances, theseus will just add instances for you
+  * specify app name
+  * labels are required
+  * image is required
+  * the following are optional (see example)
+  * ports, environment, instances, cpu, mem, constraints, custom-constraints (only fixed-host available)
+  
+
 ```yaml
 deploy:
   ingestor:
@@ -44,6 +54,16 @@ deploy:
     labels: ['dev']
 ```
 
+* remove
+  * undeploy a group and remove it from etcd
+  * specify app name and labels
+
+```yaml
+remove:
+  ingestor:
+    image: 54.189.193.228:5000/flask
+    labels: ['dev']
+```
 
 ## In Progress
 * monitoring container performance + metrics
