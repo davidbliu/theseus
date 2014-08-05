@@ -22,7 +22,7 @@ the same even with changes to marathon.
 3. deploy applications 
  * `python orchestrator.py {{config_file_path}}`
 4. viewer
- * python viewer.py
+ * `python viewer.py`
  * localhost:5001
 
 ## Example Configuration
