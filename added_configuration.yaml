@@ -1,4 +1,4 @@
-remove:
+deploy:
   # haproxy:
   #   labels: ['dev']
   #   image: 54.189.193.228:5000/haproxy
@@ -13,15 +13,15 @@ remove:
   #     WATCHES: ingestor
   #   instances: 3
   ingestor:
-  #   image: 54.189.193.228:5000/flask
-  #   ports: 
-  #     ssh: 22
-  #     api: 5000
-  #   environment:
-  #     APP_NAME: Ingestor
-  #     KEYSPACE_NAME: 'flask_keyspace2'
-  #     TABLE_NAME: 'flask_table2'
-  #   instances: 4
-  #   cpus: 0.1 
-  #   mem: 128
+    image: 54.189.193.228:5000/tester
+    ports: 
+      ssh: 22
+      # api: 5000
+    # environment:
+      # APP_NAME: Ingestor
+      # KEYSPACE_NAME: 'flask_keyspace2'
+      # TABLE_NAME: 'flask_table2'
+    instances: 3
+    cpus: 0.1 
+    mem: 128
     labels: ['dev']

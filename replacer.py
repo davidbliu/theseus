@@ -3,7 +3,7 @@ import time
 #
 # import launching and updating scripts
 #
-import launcher, updater, namespacer
+import launcher, namespacer
 import yaml
 import ast
 import uuid 
