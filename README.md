@@ -19,6 +19,7 @@ the same even with changes to marathon.
 
 ## Getting started
 __docker!__
+
 1. `docker build` (you may be missing custom-marathon-python, in which case `git clone --recursive` the repo since its a submodule)
 2. `docker run`
  * docker run -d -p 22000:22 -p 5000:5001 -e MARATHON_HOST=50.18.90.238 -e MARATHON_PORT=8080 -e ETCD_HOST_ADDRESS=50.18.90.238 54.189.193.228:5000/theseus
