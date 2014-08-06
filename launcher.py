@@ -5,10 +5,14 @@ import json
 import uuid
 import ast
 import namespacer, etcd_driver
-data = yaml.load(open('mesos.yaml', 'r'))
-etcd_host = data['etcd']['host']
-marathon_host = data['marathon']['host']
-marathon_port = data['marathon']['port']
+import os
+marathon_host = os.environ['MARATHON_HOST']
+marathon_port = os.environ['MARATHON_PORT']
+etcd_host = os.environ['ETCD_HOST_ADDRESS']
+# data = yaml.load(open('mesos.yaml', 'r'))
+# etcd_host = data['etcd']['host']
+# marathon_host = data['marathon']['host']
+# marathon_port = data['marathon']['port']
 
 
 #

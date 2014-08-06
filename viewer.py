@@ -17,7 +17,6 @@ import json
 #
 # import custom stuff
 #
-import Entities as entities  
 import orchestrator
 import mesos_log_client
 from flask_bootstrap import Bootstrap
@@ -26,14 +25,8 @@ import etcd_driver
 
 app = Flask(__name__)
 Bootstrap(app)
-services = []
-#
-# monitor all processes 
-#
 
-#
-# recieve post request and write data into kafka
-#
+
 @app.route('/', methods=['GET', 'POST'])
 def root():
 	#
@@ -42,15 +35,16 @@ def root():
 	print 'hi'
 	data = get_all_etcd_data()
 	# services_list = data.keys()
-	mesos_data = yaml.load(open('mesos.yaml', 'r'))
-	etcd_host = mesos_data['etcd']['host']
-	marathon_host = mesos_data['marathon']['host']
-	marathon_port = mesos_data['marathon']['port']
-
+	# mesos_data = yaml.load(open('mesos.yaml', 'r'))
+	# etcd_host = mesos_data['etcd']['host']
+	# marathon_host = mesos_data['marathon']['host']
+	# marathon_port = mesos_data['marathon']['port']
+	marathon_host = os.environ['MARATHON_HOST']
+	marathon_port = os.environ['MARATHON_PORT']
+	etcd_host = os.environ['ETCD_HOST_ADDRESS']
 	marathon_url = 'http://'+marathon_host+':'+str(marathon_port)
 	mesos_url = 'http://'+marathon_host+':5050'
 	etcd_url = 'http://'+etcd_host+':4001'
-	# return jsonify(result={'status':200})
 	return render_template('viewer.html', data = data,
 										  mesos_url = mesos_url,
 										  marathon_url = marathon_url, 
@@ -95,11 +89,7 @@ def get_all_etcd_data():
 
 if __name__ == '__main__':
 
-	# global data
-	data = yaml.load(open('mesos.yaml', 'r'))
-	# director = load_director()
 	host = 'localhost'
-
 	print 'running your app on '+str(host)
 
 	app.run(port=5001, host=host)

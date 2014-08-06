@@ -2,11 +2,12 @@ import yaml
 from marathon import MarathonClient
 import sys
 import yaml
-import Entities as entities
-data = yaml.load(open('mesos.yaml', 'r'))
-etcd_host = data['etcd']['host']
-marathon_host = data['marathon']['host']
-marathon_port = data['marathon']['port']
+# import Entities as entities
+import os
+# data = yaml.load(open('mesos.yaml', 'r'))
+# etcd_host = data['etcd']['host']
+# marathon_host = data['marathon']['host']
+# marathon_port = data['marathon']['port']
 
 def update_group(service_name, encoded_labels, config, existing_marathon_apps, delta = 0):
 	custom_constraints = group.config.get('custom_constraints')
