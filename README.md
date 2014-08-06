@@ -3,7 +3,7 @@ Theseus
 
 Docker container management framework built on top of Marathon
 
-
+```
   _______   _                                       
  |__   __| | |                                      
     | |    | |__     ___   ___    ___   _   _   ___ 
@@ -11,7 +11,7 @@ Docker container management framework built on top of Marathon
     | |    | | | | |  __/ \__ \ |  __/ | |_| | \__ \
     |_|    |_| |_|  \___| |___/  \___|  \__,_| |___/
                                                    
-
+```
                 
 <img src='http://1.bp.blogspot.com/-tWuvAq0dsDY/T5VAdqS8T1I/AAAAAAAAAJo/6OVlbTbLpsU/s1600/trireme.jpg' height=200></img>
 ## Explanation
