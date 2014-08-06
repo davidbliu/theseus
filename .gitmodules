@@ -1,0 +1,3 @@
+[submodule "custom-marathon-python"]
+	path = custom-marathon-python
+	url = git@git.autodesk.com:t-liuda/marathon-python.git
