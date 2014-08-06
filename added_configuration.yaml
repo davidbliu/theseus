@@ -1,27 +1,9 @@
 deploy:
-  # haproxy:
-  #   labels: ['dev']
-  #   image: 54.189.193.228:5000/haproxy
-  #   ports:
-  #     ssh: 22
-  #     proxy: 80
-  #     idk: 443
-  #     suscriber: 5000
-  #   environment:
-  #     PROXY_SERVICE: ingestor
-  #     PROXY_PORT: api
-  #     WATCHES: ingestor
-  #   instances: 3
   ingestor:
     image: 54.189.193.228:5000/tester
     ports: 
       ssh: 22
-      # api: 5000
-    # environment:
-      # APP_NAME: Ingestor
-      # KEYSPACE_NAME: 'flask_keyspace2'
-      # TABLE_NAME: 'flask_table2'
     instances: 3
     cpus: 0.1 
     mem: 128
-    labels: ['dev']
+    labels: ['monkey']

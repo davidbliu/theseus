@@ -20,6 +20,7 @@ etcd_host = os.environ['ETCD_HOST_ADDRESS']
 #
 def launch_app(service_name, app_id, config, labels = [], instances = -1):
 	print 'launching ' + service_name
+	print config #DEBUG
 	service_dict = config
 	image = service_dict['image']
 	try:
@@ -88,6 +89,12 @@ def launch_group(service_name, encoded_labels, config):
 		launch_app(service_name, marathon_id, config, labels)
 
 def marathon_api_launch(image, options, marathon_app_id, instances, constraints, cpus, mem, env, ports):
+	#DEBUG
+	print 'debug begin'
+	print image
+	print options
+	print 'debug end'
+	#DEBUG
 	marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
 	marathon_client.create_app(
 		container = {
@@ -148,7 +155,7 @@ def update_app(app_id, config, instances = 1):
 	# set up marathon client and launch container
 	#
 	image_string = 'docker:///' + config['image']
-	marathon_client = MarathonClient('http://' + str(data['marathon']['host']) + ':' + str(data['marathon']['port']))
+	marathon_client = MarathonClient('http://' + str(marathon_host) + ':' + str(marathon_port))
 	app = marathon_client.get_app(app_id)
 	#
 	# set up options for cassandra TODO this is terrible dawg

@@ -34,14 +34,10 @@ def root():
 	#
 	print 'hi'
 	data = get_all_etcd_data()
-	# services_list = data.keys()
-	# mesos_data = yaml.load(open('mesos.yaml', 'r'))
-	# etcd_host = mesos_data['etcd']['host']
-	# marathon_host = mesos_data['marathon']['host']
-	# marathon_port = mesos_data['marathon']['port']
 	marathon_host = os.environ['MARATHON_HOST']
 	marathon_port = os.environ['MARATHON_PORT']
 	etcd_host = os.environ['ETCD_HOST_ADDRESS']
+
 	marathon_url = 'http://'+marathon_host+':'+str(marathon_port)
 	mesos_url = 'http://'+marathon_host+':5050'
 	etcd_url = 'http://'+etcd_host+':4001'
@@ -50,6 +46,16 @@ def root():
 										  marathon_url = marathon_url, 
 										  etcd_url = etcd_url)
 
+
+@app.route('/deploy', methods=['POST'])
+def deploy():
+	config_data =  request.data
+
+	config_data = ast.literal_eval(config_data)
+	# print config_data
+	# print type(config_data)
+	orchestrator.update_services(config_data)
+	return jsonify(result={'status':200})
 #
 # AJAX stuff
 #
@@ -89,7 +95,12 @@ def get_all_etcd_data():
 
 if __name__ == '__main__':
 
-	host = 'localhost'
+
+	# print 'starting ssh'
+	# os.system("/usr/sbin/sshd -D &")
+
+	# host = 'localhost'
+	host = socket.gethostbyname(socket.gethostname())
 	print 'running your app on '+str(host)
 
 	app.run(port=5001, host=host)

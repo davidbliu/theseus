@@ -36,6 +36,9 @@ def get_all_data():
 # if old and old group, replace it
 #
 def update_services(data):
+	print 'updating services with this data'
+	print data
+	print '>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'
 	if data.get('deploy'):
 		for serv in data['deploy'].keys():
 			config = data['deploy'][serv]

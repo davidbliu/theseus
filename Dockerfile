@@ -17,10 +17,18 @@ RUN apt-get install -y python python-dev python-distribute python-pip
 
 # Install pip
 RUN pip install flask
-RUN pip install marathon
+
 RUN pip install flask-bootstrap
 
+
+
+
 ADD . /opt/theseus
+
+# I need my custom marathon client
+WORKDIR /opt/theseus/marathon-python
+
+RUN python setup.py install
 WORKDIR /opt/theseus
 
 EXPOSE 22 5000
