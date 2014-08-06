@@ -1,5 +1,5 @@
 {
-  "remove": {
+  "deploy": {
     "ingestor": {
       "image": "54.189.193.228:5000/tester",
       "ports": {
