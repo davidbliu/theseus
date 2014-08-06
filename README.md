@@ -3,6 +3,13 @@ Theseus
 
 Docker container management framework built on top of Marathon
 
+___________.__                                       
+\__    ___/|  |__   ____   ______ ____  __ __  ______
+  |    |   |  |  \_/ __ \ /  ___// __ \|  |  \/  ___/
+  |    |   |   Y  \  ___/ \___ \\  ___/|  |  /\___ \ 
+  |____|   |___|  /\___  >____  >\___  >____//____  >
+                \/     \/     \/     \/           \/ 
+                
 <img src='http://1.bp.blogspot.com/-tWuvAq0dsDY/T5VAdqS8T1I/AAAAAAAAAJo/6OVlbTbLpsU/s1600/trireme.jpg' height=200></img>
 ## Explanation
 Theseus is a lightweight framework to control marathon, making it easy for developers to deploy and keep track of containers.
