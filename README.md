@@ -2,7 +2,7 @@ Theseus
 =======
 
 Docker container management framework built on top of Marathon
-
+                
 <img src='http://1.bp.blogspot.com/-tWuvAq0dsDY/T5VAdqS8T1I/AAAAAAAAAJo/6OVlbTbLpsU/s1600/trireme.jpg' height=200></img>
 ## Explanation
 Theseus is a lightweight framework to control marathon, making it easy for developers to deploy and keep track of containers.
@@ -18,13 +18,37 @@ you can simply update your framework (theseus) according to the changes in marat
 the same even with changes to marathon.
 
 ## Getting started
-1. fill out mesos.yaml with marathon host and ip, etcd host and ip, and subscriber host and ip
-2. create config file with what applications you want to create, update, or destroy (example: added_configuration.yaml)
-3. deploy applications 
- * `python orchestrator.py {{config_file_path}}`
-4. viewer
- * `python viewer.py`
- * localhost:5001
+__docker!__
+
+1. `docker build` (you may be missing custom-marathon-python, in which case `git clone --recursive` the repo since its a submodule)
+2. `docker run`
+ * docker run -d -p 22000:22 -p 5000:5001 -e MARATHON_HOST=50.18.90.238 -e MARATHON_PORT=8080 -e ETCD_HOST_ADDRESS=50.18.90.238 54.189.193.228:5000/theseus
+3. visit the viewer at `{{host}}:5000` to see what is running
+4. deploy/updating/removing new apps
+5. accepts post requests to `{{host}}:5000/deploy`
+ * some examples
+ * `curl -X POST -H "Content-Type: application/json" localhost:5000/deploy -d@config.json`
+
+heres what config.json looks like: (you can use yaml->json)
+
+```json
+{
+  "deploy": {
+    "ingestor": {
+      "image": "54.189.193.228:5000/tester",
+      "ports": {
+        "ssh": 22
+      },
+      "instances": 3,
+      "cpus": 0.1,
+      "mem": 128,
+      "labels": [
+        "monkey"
+      ]
+    }
+  }
+}
+```
 
 ## Example Configuration
 
