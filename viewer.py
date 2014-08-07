@@ -49,11 +49,14 @@ def root():
 
 @app.route('/deploy', methods=['POST'])
 def deploy():
+	print 'alskdfjlaksjdflakjsdlfkjalskdjflaskdjflakjdslfjalskdjj'
+	print request
+	print 'that was the request'
 	config_data =  request.data
 
+	print config_data
 	config_data = ast.literal_eval(config_data)
-	# print config_data
-	# print type(config_data)
+
 	orchestrator.update_services(config_data)
 	return jsonify(result={'status':200})
 #
@@ -99,8 +102,8 @@ if __name__ == '__main__':
 	# print 'starting ssh'
 	# os.system("/usr/sbin/sshd -D &")
 
-	# host = 'localhost'
-	host = socket.gethostbyname(socket.gethostname())
+	host = 'localhost'
+	# host = socket.gethostbyname(socket.gethostname())
 	print 'running your app on '+str(host)
 
 	app.run(port=5001, host=host)
